@@ -20,9 +20,22 @@ services:
       DB_USER: ${POSTGRES_USER}     
       DB_PASSWORD: ${POSTGRES_PASSWORD} 
       DB_NAME: ${POSTGRES_DB}       
-
+  alembic:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alembic
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    working_dir: /app
+    entrypoint: ["alembic", "-c", "alembic.ini", "upgrade", "head"]
+    depends_on:
+      - db  # Ждет, пока PostgreSQL станет доступен
   db:
     image: postgres:14
+    container_name: db
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
