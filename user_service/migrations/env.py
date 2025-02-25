@@ -1,4 +1,3 @@
-from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
@@ -17,9 +16,10 @@ config = context.config
 target_metadata = Base.metadata
 
 def get_sync_url():
-    url = os.getenv("DATABASE_URL")
+    url = os.getenv("USER_DB_URL")
     if not url:
-        raise ValueError("DATABASE_URL не задана в файле .env или переменных окружения")
+        raise ValueError("USER_DB_URL не задана в файле .env или переменных окружения")
+    # return url
     return url.replace('postgresql+asyncpg', 'postgresql')
 
 def run_migrations_online():

@@ -1,49 +1,66 @@
 version: '3.9'
 
 services:
-  app:
+  # Микросервис пользователей
+  user-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: book_rental
+      context: ./user_service
+      dockerfile: ./Dockerfile
+    container_name: user-service
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./user_service:/app
+    environment:
+      DB_HOST: ${USER_DB_HOST}
+      DB_PORT: ${USER_DB_PORT}
+      DB_USER: ${USER_DB_USER}
+      DB_PASSWORD: ${USER_DB_PASSWORD}
+      DB_NAME: ${USER_DB_NAME}
+    depends_on:
+      - user-db
+
+  # База данных для пользователей
+  user-db:
+    image: postgres:14
+    container_name: user-db
+    environment:
+      POSTGRES_USER: ${USER_DB_USER}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+      POSTGRES_DB: ${USER_DB_NAME}
+    volumes:
+      - user_data:/var/lib/postgresql/data
+    ports:
+      - "54321:5432" 
+
+  # Миграции пользователей
+  user-migrate:
+    build:
+      context: ./user_service
+      dockerfile: ./Dockerfile
+    command: ["alembic", "upgrade", "head"]
+    container_name: user-migrate
+    env_file:
+      - .env
+    environment:
+      DB_HOST: ${USER_DB_HOST}
+      DB_PORT: ${USER_DB_PORT}
+      DB_USER: ${USER_DB_USER}
+      DB_PASSWORD: ${USER_DB_PASSWORD}
+      DB_NAME: ${USER_DB_NAME}
+    depends_on:
+      - user-db
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./api_gateway
+      dockerfile: ./Dockerfile
+    container_name: api-gateway
     ports:
       - "8000:8000"
-    env_file:
-      - .env
-    volumes:
-      - .:/app
-    working_dir: /app
     depends_on:
-      - db
-    environment:
-      DB_HOST: db                   
-      DB_USER: ${POSTGRES_USER}     
-      DB_PASSWORD: ${POSTGRES_PASSWORD} 
-      DB_NAME: ${POSTGRES_DB}       
-  alembic:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: alembic
-    env_file:
-      - .env
-    volumes:
-      - .:/app
-    working_dir: /app
-    entrypoint: ["alembic", "-c", "alembic.ini", "upgrade", "head"]
-    depends_on:
-      - db  # Ждет, пока PostgreSQL станет доступен
-  db:
-    image: postgres:14
-    container_name: db
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - user-service
 
 volumes:
-  postgres_data:
+  user_data:
