@@ -1,6 +1,16 @@
 version: '3.9'
 
 services:
+  auth-service:
+    build: 
+      context: ./auth_service
+      dockerfile: ./Dockerfile
+    container_name: auth_service
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./auth_service:/app
+
   # Микросервис пользователей
   user-service:
     build:
@@ -8,7 +18,7 @@ services:
       dockerfile: ./Dockerfile
     container_name: user-service
     ports:
-      - "8001:8000"
+      - "8001:8001"
     volumes:
       - ./user_service:/app
     environment:

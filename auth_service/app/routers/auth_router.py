@@ -14,11 +14,12 @@ def handle_value_errors(func):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return wrapper
 
-users_router = APIRouter(prefix="/auth", tags=["Users"])
+auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
-@users_router.post("/token")
+@auth_router.post("/token")
 @handle_value_errors
 async def create_token(user_data: TokenCreate, service: AuthService = Depends(get_auth_service)):
-    """Получение информации о пользователе по ID"""
+    """Создание токена доступа"""
+    print('here')
     access_token = await service.create_access_token(data={"sub": user_data.user_id}, expires_delta=timedelta(minutes=30))
     return {"access_token": access_token, "token_type": "bearer"}
