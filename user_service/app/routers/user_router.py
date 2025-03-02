@@ -35,5 +35,6 @@ async def register_user(user_data: UserCreate, service: UserService = Depends(ge
 @handle_value_errors
 async def user_login(user_data: UserLogin, service: UserService = Depends(get_user_service), db: AsyncSession = Depends(get_db)):
     """Логин пользователя"""
-    pass
+    token = await service.user_login(user_data=user_data, db=db)
+    return token
 
