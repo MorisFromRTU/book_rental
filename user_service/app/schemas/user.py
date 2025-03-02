@@ -13,3 +13,7 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     age: int | None = Field(default=None)
+
+class UserLogin(BaseModel):
+    username: str
+    password: str

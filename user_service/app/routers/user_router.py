@@ -1,29 +1,39 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-import app.database as db
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.database import get_db
-import app.services as service
+from functools import wraps
 from app.services.user_service import UserService
-from app.schemas import UserCreate
+from app.schemas import UserCreate, UserLogin
+from app.routers.utils import get_user_service
+
+def handle_value_errors(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await func(*args, **kwargs)
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    return wrapper
 
 users_router = APIRouter(prefix="/users", tags=["Users"])
 
 @users_router.get("")
-async def get_user(db: AsyncSession = Depends(get_db)):
+@handle_value_errors
+async def get_user(service: UserService = Depends(get_user_service) , db: AsyncSession = Depends(get_db)):
     """Получение информации о пользователе по ID"""
-    service = UserService(db)
-    try:
-        user = await service.get_all_users()
-        return user
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    user = await service.get_all_users()
+    return user
 
 @users_router.post("/register")
-async def register_user(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
+@handle_value_errors
+async def register_user(user_data: UserCreate, service: UserService = Depends(get_user_service), db: AsyncSession = Depends(get_db)):
     """Регистрация пользователя"""
-    service = UserService(db)
-    try:
-        user = await service.create_user(user_data)
-        return user
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    user = await service.create_user(user_data)
+    return user
+    
+@users_router.post("/login")
+@handle_value_errors
+async def user_login(user_data: UserLogin, service: UserService = Depends(get_user_service), db: AsyncSession = Depends(get_db)):
+    """Логин пользователя"""
+    pass
+
