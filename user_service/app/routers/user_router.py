@@ -19,8 +19,8 @@ users_router = APIRouter(prefix="/users", tags=["Users"])
 
 @users_router.get("")
 @handle_value_errors
-async def get_user(service: UserService = Depends(get_user_service) , db: AsyncSession = Depends(get_db)):
-    """Получение информации о пользователе по ID"""
+async def get_users(service: UserService = Depends(get_user_service) , db: AsyncSession = Depends(get_db)):
+    """Получение всех пользователей"""
     user = await service.get_all_users()
     return user
 

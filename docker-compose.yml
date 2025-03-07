@@ -1,15 +1,62 @@
 version: '3.9'
 
 services:
+  # Микросервис аутентификации
   auth-service:
     build: 
       context: ./auth_service
       dockerfile: ./Dockerfile
-    container_name: auth_service
+    container_name: auth-service
     ports:
       - "8002:8000"
     volumes:
       - ./auth_service:/app
+
+  # Микросервис по работе с книгами
+  books-service:
+    build: 
+      context: ./books_service
+      dockerfile: ./Dockerfile
+    container_name: books-service
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./books_service:/app
+
+  books-db:
+    image: postgres:14
+    container_name: books-db
+    environment:
+      POSTGRES_USER: ${BOOK_DB_USER}
+      POSTGRES_PASSWORD: ${BOOK_DB_PASSWORD}
+      POSTGRES_DB: ${BOOK_DB_NAME}
+    volumes:
+      - books_data:/var/lib/postgresql/data
+    ports:
+      - "54322:5432" 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${BOOK_DB_USER} -d ${BOOK_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  
+  books-migrate:
+    build:
+      context: ./books_service
+      dockerfile: ./Dockerfile
+    command: ["alembic", "upgrade", "head"]
+    container_name: books-migrate
+    env_file:
+      - .env
+    environment:
+      DB_HOST: ${BOOK_DB_HOST}
+      DB_PORT: ${BOOK_DB_PORT}
+      DB_USER: ${BOOK_DB_USER}
+      DB_PASSWORD: ${BOOK_DB_PASSWORD}
+      DB_NAME: ${BOOK_DB_NAME}
+    depends_on:
+      books-db:
+        condition: service_healthy
 
   # Микросервис пользователей
   user-service:
@@ -42,6 +89,7 @@ services:
       - user_data:/var/lib/postgresql/data
     ports:
       - "54321:5432" 
+    
 
   # Миграции пользователей
   user-migrate:
@@ -69,8 +117,7 @@ services:
     container_name: api-gateway
     ports:
       - "8000:8000"
-    depends_on:
-      - user-service
-
+    
 volumes:
   user_data:
+  books_data:

@@ -16,11 +16,3 @@ class User(Base):
     registered_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
     password = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
-
-class Book(Base):
-    __tablename__ = "books"  
-
-    id = Column(Integer, primary_key=True, index=True)  
-    title = Column(String, index=True)  
-    author = Column(String, index=True) 
-    price = Column(Float) 

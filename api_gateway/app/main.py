@@ -1,11 +1,12 @@
 from fastapi import FastAPI
 from pydantic_settings import BaseSettings
 from starlette.responses import JSONResponse
-from app.routers import users_router
+from app.routers import users_router, books_router
 # Настройка переменных окружения
 class Settings(BaseSettings):
     user_service_url: str = "http://user-service:8000" 
     auth_service_url: str = "http://auth-service:8000"  
+    books_service_url: str = "http://books-service:8000"
 
 settings = Settings()
 
@@ -22,3 +23,4 @@ async def root():
     return {"message": "Добро пожаловать на сервис аренды книг"}
 
 app.include_router(router=users_router)
+app.include_router(router=books_router)
