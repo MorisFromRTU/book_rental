@@ -10,6 +10,8 @@ async def make_request(method: Literal["GET", "POST"], url: str, json: dict = No
                 response = await client.get(url)
             elif method == "POST":
                 response = await client.post(url, json=json)
+            elif method == "PUT":
+                response = await client.put(url, json=json)
             else:
                 raise ValueError("Unsupported HTTP method")
 
