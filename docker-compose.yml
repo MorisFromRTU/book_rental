@@ -23,6 +23,34 @@ services:
     volumes:
       - ./books_service:/app
 
+    # Микросервис пользователей
+  user-service:
+    build:
+      context: ./user_service
+      dockerfile: ./Dockerfile
+    container_name: user-service
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./user_service:/app
+    environment:
+      DB_HOST: ${USER_DB_HOST}
+      DB_PORT: ${USER_DB_PORT}
+      DB_USER: ${USER_DB_USER}
+      DB_PASSWORD: ${USER_DB_PASSWORD}
+      DB_NAME: ${USER_DB_NAME}
+    depends_on:
+      - user-db
+
+  rental-service:
+    build: 
+      context: ./rental_service
+      dockerfile: ./Dockerfile
+    container_name: rental-service
+    ports:
+      - "8004:8000"
+    volumes:
+      - ./rental_service:/app
   books-db:
     image: postgres:14
     container_name: books-db
@@ -58,25 +86,6 @@ services:
       books-db:
         condition: service_healthy
 
-  # Микросервис пользователей
-  user-service:
-    build:
-      context: ./user_service
-      dockerfile: ./Dockerfile
-    container_name: user-service
-    ports:
-      - "8001:8001"
-    volumes:
-      - ./user_service:/app
-    environment:
-      DB_HOST: ${USER_DB_HOST}
-      DB_PORT: ${USER_DB_PORT}
-      DB_USER: ${USER_DB_USER}
-      DB_PASSWORD: ${USER_DB_PASSWORD}
-      DB_NAME: ${USER_DB_NAME}
-    depends_on:
-      - user-db
-
   # База данных для пользователей
   user-db:
     image: postgres:14
@@ -89,7 +98,6 @@ services:
       - user_data:/var/lib/postgresql/data
     ports:
       - "54321:5432" 
-    
 
   # Миграции пользователей
   user-migrate:
@@ -109,6 +117,35 @@ services:
     depends_on:
       - user-db
 
+  rental-db:
+    image: postgres:14
+    container_name: rental-db
+    environment:
+      POSTGRES_USER: ${RENTAL_DB_USER}
+      POSTGRES_PASSWORD: ${RENTAL_DB_PASSWORD}
+      POSTGRES_DB: ${RENTAL_DB_NAME}
+    volumes:
+      - rental_data:/var/lib/postgresql/data
+    ports:
+      - "54323:5432" 
+  
+  rental-migrate:
+    build:
+      context: ./rental_service
+      dockerfile: ./Dockerfile
+    command: ["alembic", "upgrade", "head"]
+    container_name: rental-migrate
+    env_file:
+      - .env
+    environment:
+      DB_HOST: ${RENTAL_DB_HOST}
+      DB_PORT: ${RENTAL_DB_PORT}
+      DB_USER: ${RENTAL_DB_USER}
+      DB_PASSWORD: ${RENTAL_DB_PASSWORD}
+      DB_NAME: ${RENTAL_DB_NAME}
+    depends_on:
+      - rental-db
+
   # API Gateway
   api-gateway:
     build:
@@ -121,3 +158,4 @@ services:
 volumes:
   user_data:
   books_data:
+  rental_data:

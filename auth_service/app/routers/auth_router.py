@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from functools import wraps
 from app.services.auth_service import AuthService
 from app.routers.utils import get_auth_service
@@ -18,8 +18,16 @@ auth_router = APIRouter(prefix="/auth", tags=["Auth"])
 
 @auth_router.post("/token")
 @handle_value_errors
-async def create_token(user_data: TokenCreate, service: AuthService = Depends(get_auth_service)):
+async def create_token(request: Request, user_data: TokenCreate, service: AuthService = Depends(get_auth_service)):
     """Создание токена доступа"""
-    print('here')
-    access_token = await service.create_access_token(data={"sub": user_data.user_id}, expires_delta=timedelta(minutes=30))
+    access_token = await service.create_access_token(
+        data={"user_id": user_data.user_id},
+        expires_delta=timedelta(minutes=30)
+    )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@auth_router.get("/verify_token")
+@handle_value_errors
+async def verify_token(request: Request, service: AuthService = Depends(get_auth_service)):
+    """Получение данных о пользователе по токену"""
+    return await service.get_access_token(headers=request.headers)

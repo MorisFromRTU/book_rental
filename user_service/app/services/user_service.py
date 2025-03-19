@@ -72,10 +72,12 @@ class UserService:
         if not hashed_password:
             raise ValueError('Ошибка при создании пользователя')
 
-        return await self.repository.create_user(
+        user_id = await self.repository.create_user(
             user_data=user_data,
             hashed_password=hashed_password
             )
+        
+        return {"message": "User created successfully", "user_id": user_id}
 
     async def user_login(self, user_data: UserLogin, db: AsyncSession):
         """Бизнес-логика логина пользователя"""

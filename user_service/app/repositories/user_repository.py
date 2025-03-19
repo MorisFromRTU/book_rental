@@ -45,4 +45,5 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(new_user)
 
-        return {"message": "User created successfully", "user_id": new_user.id}
+        return new_user.id
+    

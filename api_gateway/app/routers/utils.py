@@ -1,17 +1,21 @@
 import httpx
-from typing import Literal
 from fastapi import HTTPException
 
-async def make_request(method: Literal["GET", "POST"], url: str, json: dict = None):
+async def make_request(method: str, headers: dict, url: str, json: dict = None):
     """Общая функция для выполнения HTTP-запросов"""
+    filtered_headers = {
+            "Content-Type": "application/json",
+        }
+    if headers.get("authorization"):
+        filtered_headers["Authorization"] = headers["authorization"]
     async with httpx.AsyncClient() as client:
         try:
             if method == "GET":
-                response = await client.get(url)
+                response = await client.get(url=url, headers=filtered_headers)
             elif method == "POST":
-                response = await client.post(url, json=json)
+                response = await client.post(url=url, json=json, headers=filtered_headers)
             elif method == "PUT":
-                response = await client.put(url, json=json)
+                response = await client.put(url=url, json=json, headers=filtered_headers)
             else:
                 raise ValueError("Unsupported HTTP method")
 

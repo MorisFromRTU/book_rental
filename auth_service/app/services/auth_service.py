@@ -17,13 +17,15 @@ class AuthService:
         encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
         return encoded_jwt
 
-    async def get_access_token(self, token: str) -> dict:
+    async def get_access_token(self, headers: dict) -> dict:
         try:
-            payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            token = headers.get('Authorization')
+            print('token is: ', token.split()[1])
+            payload = jwt.decode(token.split()[1], self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            print(payload)
             return payload
         except jwt.PyJWTError:
             return None
-
         
 
     

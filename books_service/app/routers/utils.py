@@ -4,5 +4,5 @@ from fastapi import Depends
 from app.database import get_db 
 
 def get_books_service(db: AsyncSession = Depends(get_db)) -> BookService:
-    """Фабрика для создания BooksSerive"""
+    """Фабрика для создания BooksService"""
     return BookService(db)
