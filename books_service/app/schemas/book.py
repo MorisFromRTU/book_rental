@@ -8,6 +8,7 @@ class BookCreate(BaseModel):
     author: str
     price: int = Field(gt=0)
 
+
 class BookUpdate(BaseModel):
     title: Optional[str]
     author: Optional[str]

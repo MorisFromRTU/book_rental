@@ -3,6 +3,7 @@ from sqlalchemy import select, update
 from app.models.rental import RentalBook
 from datetime import datetime
 
+
 class RentalRepository:
     """
     Репозиторий для работы с арендами в базе данных.
@@ -22,7 +23,7 @@ class RentalRepository:
         )
         result = await self.db.execute(query)
         return result.scalars().all()
-    
+
     async def rent_book(self, user_id: int, book_id: int) -> int:
         """
         Создание в базе данных записи об аренде книги
@@ -48,11 +49,11 @@ class RentalRepository:
                 RentalBook.user_id == user_id,
                 RentalBook.rented_at.is_not(None),
                 RentalBook.returned_at.is_(None)
-            ) 
+            )
         )
         result = await self.db.execute(query)
         return result.scalars().first()
-    
+
     async def return_book(self, book_id: int, user_id: int):
         query = (
             update(RentalBook)

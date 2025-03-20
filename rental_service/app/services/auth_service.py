@@ -7,6 +7,7 @@ app = FastAPI()
 
 logger = logging.getLogger(__name__)
 
+
 class AuthSerivice:
     def __init__(self):
         self.AUTH_SERVICE_URL = settings.AUTH_SERVICE_URL
@@ -18,20 +19,24 @@ class AuthSerivice:
         try:
             token = headers.get('authorization')
             if not token.startswith("Bearer "):
-                raise HTTPException(status_code=401, detail="Invalid token format")
+                raise HTTPException(
+                    status_code=401, detail="Invalid token format")
             async with httpx.AsyncClient() as client:
                 response = await client.get(
                     f"{self.AUTH_SERVICE_URL}/auth/verify_token",
                     headers={"Authorization": f"{token}"}
                 )
                 if response.status_code != 200:
-                    raise HTTPException(status_code=401, detail="Invalid token")
+                    raise HTTPException(
+                        status_code=401, detail="Invalid token")
                 data = response.json()
                 if not data.get('user_id'):
-                    raise HTTPException(status_code=401, detail="Invalid token")
+                    raise HTTPException(
+                        status_code=401, detail="Invalid token")
                 return data["user_id"]
         except httpx.HTTPStatusError as e:
             logger.error(f"Ошибка при получении данных из сервиса auth: {e}")
             raise Exception("Не удалось подтвердить токен в сервисе auth")
-        
+
+
 auth_service = AuthSerivice()

@@ -3,6 +3,9 @@ from app.routers.utils import make_request
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
+    """
+    Настройки роутера для взаимодействия с сервисом книг
+    """
     books_service_url: str = "http://books-service:8000"
 
 settings = Settings()

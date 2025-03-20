@@ -20,9 +20,10 @@ AsyncSessionLocal = sessionmaker(
 
 database = Database(SQLALCHEMY_DATABASE_URL)
 
+
 async def get_db():
     db: AsyncSession = AsyncSessionLocal()
     try:
-        yield db 
+        yield db
     finally:
         await db.close()

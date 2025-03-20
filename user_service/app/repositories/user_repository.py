@@ -3,6 +3,7 @@ from app.models.user import User
 from sqlalchemy import select
 from app.schemas import UserCreate
 
+
 class UserRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -18,13 +19,13 @@ class UserRepository:
         query = select(User).where(User.id == user_id)
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
-    
+
     async def get_user_by_username(self, username: str) -> User | None:
         """Получение пользователя по username"""
         query = select(User).where(User.username == username)
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
-    
+
     async def get_user_by_email(self, email: str) -> User | None:
         """Получение пользователя по username"""
         query = select(User).where(User.email == email)
@@ -46,4 +47,3 @@ class UserRepository:
         await self.db.refresh(new_user)
 
         return new_user.id
-    

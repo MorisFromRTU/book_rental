@@ -7,6 +7,7 @@ from sqlalchemy import Column, Integer, DateTime
 
 Base = declarative_base()
 
+
 class RentalBook(Base):
     """
     Модель для описания таблица аренды

@@ -4,8 +4,11 @@ from starlette.responses import JSONResponse
 from app.routers import users_router, books_router, rental_router
 # Настройка переменных окружения
 class Settings(BaseSettings):
-    user_service_url: str = "http://user-service:8000" 
-    auth_service_url: str = "http://auth-service:8000"  
+    """
+    Настройки роутера для взаимодействия с сервисами приложения
+    """
+    user_service_url: str = "http://user-service:8000"
+    auth_service_url: str = "http://auth-service:8000"
     books_service_url: str = "http://books-service:8000"
     rental_service_url: str = "http://rental-service:8000"
 

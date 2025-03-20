@@ -17,10 +17,13 @@ def handle_value_errors(func):
         try:
             return await func(*args, **kwargs)
         except ValueError as e:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     return wrapper
 
+
 books_router = APIRouter(prefix="/books", tags=["Books"])
+
 
 @books_router.get("")
 @handle_value_errors
@@ -51,6 +54,7 @@ async def update_book(book_id: int, book_data: BookUpdate, service: BookService 
     if not updated_book:
         raise HTTPException(status_code=404, detail="Book not found")
     return {'book_data': updated_book}
+
 
 @books_router.get("/{book_id}", status_code=200)
 @handle_value_errors
